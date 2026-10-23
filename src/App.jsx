@@ -5,8 +5,11 @@ import Register from './pages/Register'
 import Game from './pages/Game'
 import Leaderboard from './pages/Leaderboard'
 import Admin from './pages/Admin'
+import { useAuth } from './hooks/useAuth'
 
 export default function App() {
+  const { token, user, login, logout, isAuthenticated } = useAuth()
+
   return (
     <BrowserRouter>
       <nav className="main-nav">
@@ -19,6 +22,18 @@ export default function App() {
           <li><NavLink to="/leaderboard" className={({isActive}) => isActive ? 'active' : ''}>Leaderboard</NavLink></li>
           <li><NavLink to="/admin" className={({isActive}) => isActive ? 'active' : ''}>Admin</NavLink></li>
         </ul>
+
+        {isAuthenticated ? (
+          <div className="auth-buttons">
+            <span>Bienvenido, {user?.email || user?.name || 'Usuario'}</span>
+            <button onClick={logout} className="btn-logout">Cerrar sesión</button>
+          </div>
+        ) : (
+          <div className="auth-buttons">
+            <button onClick={() => login('token-prueba', { name: 'Usuario', email: 'test@test.com' })} className="btn-login">Login</button>
+            <button onClick={() => login('token-prueba-2', { name: 'Otro', email: 'otro@test.com' })} className="btn-register">Registro</button>
+          </div>
+        )}
       </nav>
 
       <main>
