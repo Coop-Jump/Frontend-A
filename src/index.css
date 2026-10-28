@@ -103,6 +103,9 @@ button[type="submit"] {
   transition: background-color 0.2s;
 }
 
+.error-message { color: #f87171; font-size: 0.875rem; }
+.success-message { color: #34d399; font-size: 0.875rem; }
+
 button[type="submit"]:hover {
   background-color: #6bb0ff;
 }
