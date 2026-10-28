@@ -5,6 +5,7 @@ import Register from './pages/Register'
 import Game from './pages/Game'
 import Leaderboard from './pages/Leaderboard'
 import Admin from './pages/Admin'
+import LevelSelection from './pages/LevelSelection'
 import { useAuth } from './hooks/useAuth'
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
           <li><NavLink to="/register" className={({isActive}) => isActive ? 'active' : ''}>Registro</NavLink></li>
           <li><NavLink to="/game" className={({isActive}) => isActive ? 'active' : ''}>Juego</NavLink></li>
           <li><NavLink to="/leaderboard" className={({isActive}) => isActive ? 'active' : ''}>Leaderboard</NavLink></li>
+          <li><NavLink to="/levels" className={({isActive}) => isActive ? 'active' : ''}>Niveles</NavLink></li>
           <li><NavLink to="/admin" className={({isActive}) => isActive ? 'active' : ''}>Admin</NavLink></li>
         </ul>
 
@@ -43,6 +45,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/game" element={<Game />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/levels" element={<LevelSelection />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
