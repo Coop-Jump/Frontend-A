@@ -3,21 +3,22 @@
 
 > Documento **generado automáticamente** por la cátedra de Programación III (RepoSense + análisis de calidad + constancia). **No editar a mano**: se regenera en cada evaluación.
 > Rama evaluada: `main`. Análisis **heurístico** (regex + métricas): es una criba para orientar la revisión, **no una nota**.
-> Generado: 2026-10-28.
+> Generado: 2026-10-29.
 
 ## 1. Veredicto
 
 | Aspecto | Resultado |
 |---|---|
 | Tipo de proyecto | frontend |
-| Índice de calidad de servicios | **73/100** (mínimo 60) |
-| Criterios cumplidos | **12/15** |
+| Índice de calidad de servicios | **40/100** (mínimo 60) |
+| Criterios cumplidos | **11/14** |
 | Aprobado (semáforo) | **NO** |
-| Código (LOC) | 156 |
-| Archivos de código | 10 |
+| Código (LOC) | 467 |
+| Archivos de código | 17 |
 | Tests (archivos) | 0 |
-| Cobertura de líneas | no medible (mínimo 80%) |
-| Capas detectadas | vistas |
+| Cobertura de líneas | no aplica (frontend sin herramienta de cobertura E2E) (mínimo 80%) |
+| Capas detectadas | vistas, servicios, estado |
+| Tope por duplicación | `DUP>=15%` → índice ≤ 50 |
 
 > **Aprobado** exige cumplir **todos** los criterios del semáforo. No es una nota: sirve para ordenar y priorizar la revisión.
 
@@ -25,7 +26,7 @@
 
 | Autor | Commits | Código (LOC) | Tests (LOC) | Docs (LOC) | Días activos | % del código |
 |---|---:|---:|---:|---:|---:|---:|
-| Ivan Roth | 1 | 0 | 0 | 0 | 2 | 0% |
+| Ivan Roth | 5 | 420 | 0 | 0 | 3 | 100% |
 
 > _El LOC de autoría lo calcula RepoSense sobre el historial y puede diferir del LOC de código del análisis de calidad (que mira solo el estado de `main`)._
 
@@ -35,7 +36,7 @@
 
 | Alumno | Sesiones | Cumplimiento | Pausa | Recencia | IC | Nivel | Para subir de nivel |
 |---|--:|--:|--:|--:|--:|--|--|
-| Ivan Roth | 12 | 55% | 21 d | 64% | **45** | No aprueba | Pausa 21 d (máx. 10 d) |
+| Ivan Roth | 9 | 41% | 12 d | 93% | **40** | No aprueba | Cumplimiento 41% (mín. 50%); Pausa 12 d (máx. 10 d) |
 
 > Para aprobar el IC: **2 sesiones por semana** sostenidas, sin pausas mayores a **10 días** y con actividad en las **últimas 2 semanas**. Se excluyen merges, bots y al docente. Zona horaria UTC-3.
 
@@ -43,17 +44,25 @@
 
 Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuando el resultado está en rojo, se agregan preguntas para **investigar la causa** (no hay recetas: entender el porqué es parte de la evaluación).
 
-### 1. Índice de calidad de servicios (indice) — OK
+### 1. Índice de calidad de servicios (indice) — A REVISAR
 
 - **Qué mide:** Un resumen numérico (0-100) que combina todas las señales y métricas del análisis, con topes duros por duplicación.
 - **Por qué importa:** Ordena y prioriza la revisión: un índice bajo indica varias señales que conviene mirar juntas.
-- **Tu resultado:** índice **73/100** _(mínimo 60)_
+- **Tu resultado:** índice **40/100** _(mínimo 60)_
+- **Para investigar la causa:**
+    - ¿En qué momento del proyecto se concentraron los problemas (arranque, integración de partes, cierre)?
+    - ¿El índice bajó por muchas señales chicas o por una o dos graves?
+    - ¿Se revisó el código integrado después de unir el trabajo de cada integrante?
 
-### 2. Duplicación (DRY) (duplicacion) — OK
+### 2. Duplicación (DRY) (duplicacion) — A REVISAR
 
 - **Qué mide:** Porcentaje de bloques de código repetidos (similitud) en el repositorio.
 - **Por qué importa:** Cada copia se mantiene por separado: un arreglo hay que repetirlo y los defectos se multiplican.
-- **Tu resultado:** **0.0%** de duplicación _(máximo 15%)_
+- **Tu resultado:** **15.7%** de duplicación _(máximo 15%)_
+- **Para investigar la causa:**
+    - ¿El trabajo se repartió por pantallas o archivos y se integró copiando y pegando bloques?
+    - ¿Qué zonas del sistema cambiaron juntas más de una vez (señal de lógica compartida)?
+    - ¿Hubo un lugar común acordado para la lógica repetida antes de empezar, o cada integrante resolvió lo suyo?
 
 ### 3. Secretos hardcodeados (SEC) — OK
 
@@ -67,15 +76,11 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 - **Por qué importa:** Es la puerta clásica a inyección: un valor que llega de afuera puede cambiar la consulta.
 - **Tu resultado:** **0** consulta(s) SQL por concatenación _(máximo 0)_
 
-### 5. Separación en capas (capas) — A REVISAR
+### 5. Separación en capas (capas) — OK
 
 - **Qué mide:** Si el código está separado en capas reconocibles (backend: presentación / lógica / datos; frontend: vistas / servicios / estado).
 - **Por qué importa:** Sin separación, cada archivo hace de todo y cualquier cambio toca varios lugares a la vez.
-- **Tu resultado:** **1** capa(s) detectada(s): vistas _(mínimo 2 capas (a partir de 150 LOC))_
-- **Para investigar la causa:**
-    - ¿Se definió una arquitectura (carpetas y responsabilidades) antes de codificar, o se creó sobre la marcha?
-    - ¿Hay archivos que resuelven varias cosas a la vez (ruta + lógica + acceso a datos en el mismo lugar)?
-    - ¿La estructura de carpetas la propuso alguien y el resto la respetó?
+- **Tu resultado:** **3** capa(s) detectada(s): vistas, servicios, estado _(mínimo 2 capas (a partir de 150 LOC))_
 
 ### 6. Acceso a datos dentro del componente (HTTP) — OK
 
@@ -111,7 +116,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Complejidad ciclomática: cantidad de caminos posibles dentro de una función (condicionales, bucles, casos).
 - **Por qué importa:** Muchos caminos = difícil de seguir y de probar; suelen esconderse casos sin cubrir.
-- **Tu resultado:** **1** bloque(s) de complejidad alta _(máximo 5 por 1000 LOC (tenés 156 LOC))_
+- **Tu resultado:** **4** bloque(s) de complejidad alta _(máximo 5 por 1000 LOC (tenés 467 LOC))_
 - **Para investigar la causa:**
     - ¿Se agregaron condiciones a medida que aparecían casos nuevos?
     - ¿Se probaron todos los caminos o solo el caso principal?
@@ -121,7 +126,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Tamaño de las funciones/métodos y cantidad de parámetros.
 - **Por qué importa:** Una función que hace varias cosas cuesta leerla, nombrarla y reutilizarla.
-- **Tu resultado:** **0** función/método(s) largos o con muchos parámetros _(máximo 10 por 1000 LOC)_
+- **Tu resultado:** **4** función/método(s) largos o con muchos parámetros _(máximo 10 por 1000 LOC)_
 
 ### 13. Acoplamiento alto (Acop) — OK
 
@@ -129,21 +134,11 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 - **Por qué importa:** Piezas muy enlazadas hacen que un cambio se propague y que sea difícil reemplazar partes.
 - **Tu resultado:** **0** unidad(es) con acoplamiento alto _(máximo 2 por 1000 LOC)_
 
-### 14. Cobertura de tests (Cob) — A REVISAR
-
-- **Qué mide:** Porcentaje de líneas de código ejecutadas por la suite de tests (cobertura real, no cantidad de archivos de test).
-- **Por qué importa:** Un test que existe pero no ejecuta el código no protege de nada: la cobertura muestra qué partes quedan sin verificar.
-- **Tu resultado:** **no medible** (sin tests, sin runner o sin artefacto de cobertura) _(mínimo 80% de líneas)_
-- **Para investigar la causa:**
-    - ¿Qué módulos o ramas del sistema nunca se ejecutan en los tests?
-    - ¿Los tests prueban el camino principal y los errores, o solo el caso feliz?
-    - ¿La suite se puede correr en CI sin base de datos ni servicios externos?
-
-### 15. Vistas del frontend (Vistas) — OK
+### 14. Vistas del frontend (Vistas) — OK
 
 - **Qué mide:** Cantidad de vistas/componentes de pantalla del frontend.
 - **Por qué importa:** El frontend se mide por pantallas: pocas vistas sugiere poca cobertura de la interfaz pedida.
-- **Tu resultado:** **8** vista(s)/componente(s) _(mínimo 8)_
+- **Tu resultado:** **10** vista(s)/componente(s) _(mínimo 8)_
 
 ## 5. Qué falta para aprobar
 
@@ -151,9 +146,9 @@ Criterios que hoy están en rojo y qué habría que cambiar para alcanzar el niv
 
 | Criterio | Resultado actual | Meta | Qué arreglar |
 |---|---|---|---|
-| Separación en capas (capas) | **1** capa(s) detectada(s): vistas | mínimo 2 capas (a partir de 150 LOC) | Separar el código en al menos 2 capas con responsabilidades claras (rutas/controladores, servicios, modelos o acceso a datos). |
-| Complejidad alta (Compl) | **1** bloque(s) de complejidad alta | máximo 5 por 1000 LOC (tenés 156 LOC) | Extraer ramas y reglas a funciones con nombre propio; ≤5 bloques por 1000 LOC. |
-| Cobertura de tests (Cob) | **no medible** (sin tests, sin runner o sin artefacto de cobertura) | mínimo 80% de líneas | Publicar cobertura (o correr la suite con coverage) y cubrir ≥80% de líneas. |
+| Índice de calidad de servicios (indice) | índice **40/100** | mínimo 60 | Subir el índice a ≥60 corrigiendo primero las señales de más peso: duplicación, secretos, SQL y capas. |
+| Duplicación (DRY) (duplicacion) | **15.7%** de duplicación | máximo 15% | Unificar los bloques repetidos en un módulo o función compartida; apuntar a ≤15%. |
+| Complejidad alta (Compl) | **4** bloque(s) de complejidad alta | máximo 5 por 1000 LOC (tenés 467 LOC) | Extraer ramas y reglas a funciones con nombre propio; ≤5 bloques por 1000 LOC. |
 
 > Empezá por las señales de seguridad (**SEC**, **SQL**) y por la **duplicación**: son las que más pesan en el índice y las más rápidas de verificar a ojo.
 
@@ -161,11 +156,11 @@ Criterios que hoy están en rojo y qué habría que cambiar para alcanzar el niv
 
 Archivos donde el análisis encontró cada señal en rojo (sin número de línea, a propósito):
 
-**Separación en capas (capas)** — 1 archivo(s):
-- `-`
-
-**Complejidad alta (Compl)** — 1 archivo(s):
+**Complejidad alta (Compl)** — 4 archivo(s):
 - `src/App.jsx`
+- `src/pages/LevelSelection.jsx`
+- `src/pages/Login.jsx`
+- `src/pages/Register.jsx`
 
 ---
 _Informe generado por la cátedra. Los umbrales corresponden al perfil `exigente`. Ante dudas, revisá el archivo señalado y el criterio en `CRITERIOS-CALIDAD.md`._
