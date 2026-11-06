@@ -10,3 +10,15 @@ export async function submitRun({ levelId, completionTimeMs, deaths }) {
   })
   return data.run
 }
+
+// GET /levels/:id/runs -> top 10 de un nivel, ordenado por tiempo
+export async function fetchLevelRuns(levelId) {
+  const { data } = await api.get(`/levels/${levelId}/runs`)
+  return data.runs
+}
+
+// GET /levels/users/me/runs -> historial de partidas del usuario autenticado
+export async function fetchMyRuns() {
+  const { data } = await api.get('/levels/users/me/runs')
+  return data.runs
+}
