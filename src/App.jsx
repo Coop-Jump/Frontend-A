@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, NavLink } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -6,49 +6,27 @@ import Game from './pages/Game'
 import Leaderboard from './pages/Leaderboard'
 import Admin from './pages/Admin'
 import LevelSelection from './pages/LevelSelection'
-import { useAuth } from './hooks/useAuth'
+import Dashboard from './pages/Dashboard'
+import Singleplayer from './pages/Singleplayer'
+import TwoPlayer from './pages/TwoPlayer'
+import Settings from './pages/Settings'
 
 export default function App() {
-  const { user, logout, isAuthenticated } = useAuth()
-
   return (
     <BrowserRouter>
-      <nav className="main-nav">
-        <Link to="/" className="logo">Frontend-A</Link>
-        <ul>
-          <li><NavLink to="/" className={({isActive}) => isActive ? 'active' : ''} end>Inicio</NavLink></li>
-          <li><NavLink to="/login" className={({isActive}) => isActive ? 'active' : ''}>Login</NavLink></li>
-          <li><NavLink to="/register" className={({isActive}) => isActive ? 'active' : ''}>Registro</NavLink></li>
-          <li><NavLink to="/game" className={({isActive}) => isActive ? 'active' : ''}>Juego</NavLink></li>
-          <li><NavLink to="/leaderboard" className={({isActive}) => isActive ? 'active' : ''}>Leaderboard</NavLink></li>
-          <li><NavLink to="/levels" className={({isActive}) => isActive ? 'active' : ''}>Niveles</NavLink></li>
-          <li><NavLink to="/admin" className={({isActive}) => isActive ? 'active' : ''}>Admin</NavLink></li>
-        </ul>
-
-        {isAuthenticated ? (
-          <div className="auth-buttons">
-            <span>Bienvenido, {user?.username || 'Usuario'}</span>
-            <button onClick={logout} className="btn-logout">Cerrar sesión</button>
-          </div>
-        ) : (
-          <div className="auth-buttons">
-            <Link to="/login" className="btn-login">Login</Link>
-            <Link to="/register" className="btn-register">Registro</Link>
-          </div>
-        )}
-      </nav>
-
-      <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/game" element={<Game />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/levels" element={<LevelSelection />} />
-          <Route path="/admin" element={<Admin />} />
-        </Routes>
-      </main>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/game" element={<Game />} />
+        <Route path="/singleplayer" element={<Singleplayer />} />
+        <Route path="/two-player" element={<TwoPlayer />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/levels" element={<LevelSelection />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
     </BrowserRouter>
   )
 }

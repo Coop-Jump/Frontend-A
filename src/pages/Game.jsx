@@ -111,8 +111,9 @@ export default function Game() {
   return (
     <div className="page">
       <h2>{level.title}</h2>
-      <p>Flechas / WASD para moverte, espacio para saltar. Evita lo rojo y llega a la meta verde.</p>
+      <p>Evita lo rojo y llega a la meta: ambos jugadores deben alcanzarla.</p>
       <PhaserGame key={attempt} level={level.grid_json} onComplete={handleComplete} />
+      <Link to="/levels" className="btn-back" style={{ display: 'inline-block', marginTop: '12px' }}>← Volver a niveles</Link>
     </div>
   )
 }
