@@ -4,7 +4,7 @@ import { loginUser, saveAuthSession } from '../services/authService'
 import { Link } from 'react-router-dom'
 
 export default function Login() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -15,9 +15,9 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      const response = await loginUser({ email, password })
+      const response = await loginUser({ username, password })
       saveAuthSession({ token: response.token || response.accessToken, user: response.user })
-      navigate('/game')
+      navigate('/levels')
     } catch (err) {
       const message = err?.response?.data?.message || 'Credenciales inválidas. Intenta de nuevo.'
       setError(message)
@@ -30,13 +30,13 @@ export default function Login() {
     <div className="page">
       <h1>Iniciar Sesión</h1>
       <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Correo electrónico</label>
+        <label htmlFor="username">Nombre de usuario</label>
         <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="tu@correo.com"
+          id="username"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="tu_usuario"
           required
         />
         <label htmlFor="password">Contraseña</label>

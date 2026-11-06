@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { registerUser, saveAuthSession } from '../services/authService'
+import { registerUser } from '../services/authService'
 
 export default function Register() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
@@ -23,12 +23,9 @@ export default function Register() {
 
     setLoading(true)
     try {
-      const response = await registerUser({ email, password })
-      setSuccess('Registro exitoso. Redirigiendo...')
-      if (response.token || response.accessToken || response.user) {
-        saveAuthSession({ token: response.token || response.accessToken, user: response.user })
-        setTimeout(() => navigate('/game'), 1500)
-      }
+      await registerUser({ username, password })
+      setSuccess('Registro exitoso. Redirigiendo al login...')
+      setTimeout(() => navigate('/login'), 1500)
     } catch (err) {
       const message = err?.response?.data?.message || 'No se pudo registrar. Intenta más tarde.'
       setError(message)
@@ -41,13 +38,13 @@ export default function Register() {
     <div className="page">
       <h1>Registrarse</h1>
       <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Correo electrónico</label>
+        <label htmlFor="username">Nombre de usuario</label>
         <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="tu@correo.com"
+          id="username"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="tu_usuario"
           required
         />
         <label htmlFor="password">Contraseña</label>

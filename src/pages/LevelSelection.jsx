@@ -12,7 +12,7 @@ export default function LevelSelection() {
     async function loadLevels() {
       try {
         const data = await fetchLevels()
-        setLevels(data)
+        setLevels(data.levels)
       } catch (err) {
         const message = err?.response?.data?.message || 'No se pudieron cargar los niveles.'
         setError(message)
@@ -49,8 +49,8 @@ export default function LevelSelection() {
       <div className="levels-grid">
         {levels.map((level) => (
           <div key={level.id} className="level-card">
-            <h3>Nivel {level.number}</h3>
-            <p>{level.description || 'Descripción no disponible'}</p>
+            <h3>{level.title}</h3>
+            <p>Dificultad: {level.difficulty || 'N/D'}</p>
             <button
               onClick={() => navigate(`/game?level=${level.id}`)}
               className="btn-play"

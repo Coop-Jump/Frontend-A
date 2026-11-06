@@ -9,7 +9,7 @@ import LevelSelection from './pages/LevelSelection'
 import { useAuth } from './hooks/useAuth'
 
 export default function App() {
-  const { token, user, login, logout, isAuthenticated } = useAuth()
+  const { user, logout, isAuthenticated } = useAuth()
 
   return (
     <BrowserRouter>
@@ -27,13 +27,13 @@ export default function App() {
 
         {isAuthenticated ? (
           <div className="auth-buttons">
-            <span>Bienvenido, {user?.email || user?.name || 'Usuario'}</span>
+            <span>Bienvenido, {user?.username || 'Usuario'}</span>
             <button onClick={logout} className="btn-logout">Cerrar sesión</button>
           </div>
         ) : (
           <div className="auth-buttons">
-            <button onClick={() => login('token-prueba', { name: 'Usuario', email: 'test@test.com' })} className="btn-login">Login</button>
-            <button onClick={() => login('token-prueba-2', { name: 'Otro', email: 'otro@test.com' })} className="btn-register">Registro</button>
+            <Link to="/login" className="btn-login">Login</Link>
+            <Link to="/register" className="btn-register">Registro</Link>
           </div>
         )}
       </nav>
