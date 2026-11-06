@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { registerUser, saveAuthSession } from '../services/authService'
+import { registerUser } from '../services/authService'
 
 export default function Register() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
@@ -18,12 +18,9 @@ export default function Register() {
     if (password !== confirm) { setError('Las contraseñas no coinciden.'); return }
     setLoading(true)
     try {
-      const response = await registerUser({ email, password })
-      setSuccess('Registro exitoso. Redirigiendo...')
-      if (response.token || response.accessToken || response.user) {
-        saveAuthSession({ token: response.token || response.accessToken, user: response.user })
-        setTimeout(() => navigate('/dashboard'), 1500)
-      }
+      await registerUser({ username, password })
+      setSuccess('Registro exitoso. Redirigiendo al login...')
+      setTimeout(() => navigate('/login'), 1500)
     } catch (err) {
       const message = err?.response?.data?.message || 'No se pudo registrar. El backend no está conectado.'
       setError(message)
@@ -38,8 +35,8 @@ export default function Register() {
         <h1 style={{ fontSize: 36, color: '#f97316', fontWeight: 800, marginBottom: 8, textAlign: 'center' }}>Registrarse</h1>
         <p style={{ color: '#fb923c', textAlign: 'center', marginBottom: 28, fontWeight: 500 }}>Únete a Coop Jump</p>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <label htmlFor="email" style={{ fontSize: 14, fontWeight: 600, color: '#c2410c' }}>Correo</label>
-          <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@correo.com" required style={{ padding: 14, borderRadius: 10, border: '2px solid #ffedd5', background: '#fff7ed', color: '#1a202c', fontSize: 16 }} />
+          <label htmlFor="username" style={{ fontSize: 14, fontWeight: 600, color: '#c2410c' }}>Usuario</label>
+          <input id="username" type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="tu_usuario" required style={{ padding: 14, borderRadius: 10, border: '2px solid #ffedd5', background: '#fff7ed', color: '#1a202c', fontSize: 16 }} />
           <label htmlFor="password" style={{ fontSize: 14, fontWeight: 600, color: '#c2410c', marginTop: 6 }}>Contraseña</label>
           <input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required style={{ padding: 14, borderRadius: 10, border: '2px solid #ffedd5', background: '#fff7ed', color: '#1a202c', fontSize: 16 }} />
           <label htmlFor="confirm" style={{ fontSize: 14, fontWeight: 600, color: '#c2410c', marginTop: 6 }}>Confirmar contraseña</label>

@@ -12,7 +12,7 @@ export default function LevelSelection() {
     async function loadLevels() {
       try {
         const data = await fetchLevels()
-        setLevels(data || [])
+        setLevels(data.levels || [])
       } catch (err) {
         const message = err?.response?.data?.message || 'No se pudieron cargar los niveles. El backend no está conectado.'
         setError(message)
@@ -44,8 +44,8 @@ export default function LevelSelection() {
         <div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
           {levels.map((level) => (
             <div key={level.id} style={{ background: 'linear-gradient(135deg, #fff7ed 0%, #fff 100%)', border: '2px solid #ffedd5', borderRadius: 16, padding: 24, color: '#1a202c', boxShadow: '0 8px 20px rgba(249,115,22,0.15)' }}>
-              <h3 style={{ fontSize: 22, color: '#f97316', fontWeight: 800, marginBottom: 6 }}>{level.number ? `Nivel ${level.number}` : `Nivel ${level.id}`}</h3>
-              <p style={{ color: '#7c2d12', fontSize: 15, marginBottom: 12 }}>{level.description || 'Sin descripción'}</p>
+              <h3 style={{ fontSize: 22, color: '#f97316', fontWeight: 800, marginBottom: 6 }}>{level.title}</h3>
+              <p style={{ color: '#7c2d12', fontSize: 15, marginBottom: 12 }}>Dificultad: {level.difficulty || 'N/D'}</p>
               <button
                 onClick={() => navigate(`/game?level=${level.id}`)}
                 style={{ width: '100%', padding: 12, background: '#f97316', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: 'pointer' }}

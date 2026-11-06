@@ -4,7 +4,7 @@ import { loginUser, saveAuthSession } from '../services/authService'
 import { Link } from 'react-router-dom'
 
 export default function Login() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -15,7 +15,7 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      const response = await loginUser({ email, password })
+      const response = await loginUser({ username, password })
       saveAuthSession({ token: response.token || response.accessToken, user: response.user })
       navigate('/dashboard')
     } catch (err) {
@@ -32,8 +32,8 @@ export default function Login() {
         <h1 style={{ fontSize: 36, color: '#f97316', fontWeight: 800, marginBottom: 8, textAlign: 'center' }}>Iniciar Sesión</h1>
         <p style={{ color: '#fb923c', textAlign: 'center', marginBottom: 28, fontWeight: 500 }}>Entra al mundo de Coop Jump</p>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <label htmlFor="email" style={{ fontSize: 14, fontWeight: 600, color: '#c2410c' }}>Correo</label>
-          <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@correo.com" required style={{ padding: 14, borderRadius: 10, border: '2px solid #ffedd5', background: '#fff7ed', color: '#1a202c', fontSize: 16 }} />
+          <label htmlFor="username" style={{ fontSize: 14, fontWeight: 600, color: '#c2410c' }}>Usuario</label>
+          <input id="username" type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="tu_usuario" required style={{ padding: 14, borderRadius: 10, border: '2px solid #ffedd5', background: '#fff7ed', color: '#1a202c', fontSize: 16 }} />
           <label htmlFor="password" style={{ fontSize: 14, fontWeight: 600, color: '#c2410c', marginTop: 6 }}>Contraseña</label>
           <input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required style={{ padding: 14, borderRadius: 10, border: '2px solid #ffedd5', background: '#fff7ed', color: '#1a202c', fontSize: 16 }} />
           <button type="submit" disabled={loading} style={{ marginTop: 10, padding: 16, background: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 800, fontSize: 18, cursor: 'pointer', boxShadow: '0 10px 20px rgba(249,115,22,0.3)' }}>

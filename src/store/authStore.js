@@ -22,7 +22,7 @@ const createAuthStore = (set) => ({
 
 export const useAuthStore = create(
   persist(createAuthStore, {
-    name: STORAGE_KEY,
+    name: 'auth-storage', // distinto de STORAGE_KEY para no pisar el token plano
     storage: createJSONStorage(() => localStorage),
     partialize: (state) => ({ token: state.token, user: state.user }),
   }),
