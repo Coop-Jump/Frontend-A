@@ -1,6 +1,11 @@
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
+import LevelsAdminPanel from '../components/LevelsAdminPanel'
 
 export default function Admin() {
+  const { isAuthenticated } = useAuth()
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fff 0%, #fff5eb 100%)', padding: 30 }}>
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
@@ -19,6 +24,8 @@ export default function Admin() {
             </div>
           ))}
         </div>
+
+        <LevelsAdminPanel />
 
         <div style={{ marginTop: 30, textAlign: 'center' }}>
           <Link to="/dashboard" style={{ display: 'inline-block', padding: '12px 30px', background: '#f97316', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 800, fontSize: 16, boxShadow: '0 6px 20px rgba(249,115,22,0.3)' }}>Volver al Dashboard</Link>
