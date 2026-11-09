@@ -12,6 +12,11 @@ const FONT = 'Fredoka, Inter, system-ui, sans-serif'
 const POINTS = { coin: 10, gem: 50, star: 100 }
 const RESPAWN_PLATFORM_MS = 2500
 const HUD_INTERVAL_MS = 80
+// Margen (en px del mundo) que la cámara deja alrededor de los jugadores en coop.
+const CAMERA_PAD_X = 130
+const CAMERA_PAD_Y = 100
+const CAMERA_MIN_ZOOM = 0.35
+const CAMERA_ZOOM_LERP = 0.08
 
 export default class MainScene extends Phaser.Scene {
   constructor() {
@@ -46,10 +51,10 @@ export default class MainScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, worldW, worldH)
     // Sin colisión abajo: caer al vacío cuenta como muerte (ver update).
     this.physics.world.setBoundsCollision(true, true, true, false)
-    // Si el nivel es más chico que la pantalla, los límites se amplían para que quede centrado.
-    const boundsW = Math.max(worldW, VIEW.width)
-    const boundsH = Math.max(worldH, VIEW.height)
-    this.cameras.main.setBounds(-(boundsW - worldW) / 2, -(boundsH - worldH) / 2, boundsW, boundsH)
+    // La cámara no usa límites de Phaser: se calcula a mano (ver updateCamera) porque
+    // el zoom cambia para mantener a los dos jugadores a la vista.
+    this.worldW = worldW
+    this.minZoom = Phaser.Math.Clamp(Math.min(VIEW.width / worldW, VIEW.height / worldH), CAMERA_MIN_ZOOM, 1)
     this.cameras.main.setRoundPixels(true)
 
     this.createBackground(worldW, worldH)
@@ -63,6 +68,7 @@ export default class MainScene extends Phaser.Scene {
 
     this.cameraTarget = this.add.zone(this.players[0].x, this.players[0].y, 1, 1)
     this.cameras.main.startFollow(this.cameraTarget, true, 0.1, 0.1)
+    this.updateCamera(true)
     this.cameras.main.fadeIn(350, 0, 0, 0)
 
     this.pauseText = this.add
@@ -78,6 +84,7 @@ export default class MainScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(50)
       .setVisible(false)
+    this.fixedLayers.push(this.pauseText)
 
     this.emitHud(true)
   }
@@ -86,20 +93,25 @@ export default class MainScene extends Phaser.Scene {
 
   createBackground(worldW, worldH) {
     const t = this.theme
-    this.add.image(VIEW.width / 2, VIEW.height / 2, `sky_${t.id}`).setScrollFactor(0).setDepth(-30)
-    if (t.stars) this.add.image(VIEW.width / 2, VIEW.height / 2, 'stars').setScrollFactor(0).setDepth(-29)
+    // Las capas de fondo (y la pantalla de pausa) son fijas en pantalla. Como el zoom de la
+    // cámara también las escalaría, cada frame se les aplica la escala inversa (ver updateCamera).
+    this.fixedLayers = []
+    const sky = this.add.image(VIEW.width / 2, VIEW.height / 2, `sky_${t.id}`).setScrollFactor(0).setDepth(-30)
+    this.fixedLayers.push(sky)
+    if (t.stars) {
+      this.fixedLayers.push(this.add.image(VIEW.width / 2, VIEW.height / 2, 'stars').setScrollFactor(0).setDepth(-29))
+    }
 
     this.clouds = this.add
-      .tileSprite(0, 40, VIEW.width, 180, 'clouds')
-      .setOrigin(0, 0)
+      .tileSprite(VIEW.width / 2, 40 + 90, VIEW.width, 180, 'clouds')
       .setScrollFactor(0)
       .setDepth(-28)
       .setAlpha(t.stars ? 0.12 : 0.9)
     this.mountains = this.add
-      .tileSprite(0, VIEW.height - 300, VIEW.width, 300, `mountains_${t.id}`)
-      .setOrigin(0, 0)
+      .tileSprite(VIEW.width / 2, VIEW.height - 150, VIEW.width, 300, `mountains_${t.id}`)
       .setScrollFactor(0)
       .setDepth(-27)
+    this.fixedLayers.push(this.clouds, this.mountains)
 
     // Marco del nivel
     const frame = this.add.graphics().setDepth(-5)
@@ -306,7 +318,7 @@ export default class MainScene extends Phaser.Scene {
     pl.tag = this.add
       .text(x, y - size, label, {
         fontFamily: FONT,
-        fontSize: '13px',
+        fontSize: '15px',
         fontStyle: 'bold',
         color: charId === 'fox' ? '#fed7aa' : '#bfdbfe',
         stroke: '#0f172a',
@@ -518,9 +530,7 @@ export default class MainScene extends Phaser.Scene {
       this.animate(pl, time)
     })
 
-    const mx = this.players.reduce((a, p) => a + p.x, 0) / this.players.length
-    const my = this.players.reduce((a, p) => a + p.y, 0) / this.players.length
-    this.cameraTarget.setPosition(mx, my)
+    this.updateCamera()
 
     // Parallax y lava animada
     const cam = this.cameras.main
@@ -535,6 +545,38 @@ export default class MainScene extends Phaser.Scene {
       this.hudTimer = 0
       this.emitHud()
     }
+  }
+
+  // Encuadra a los jugadores: en coop acerca o aleja el zoom para que los dos
+  // queden siempre a la vista (como máximo se ve el nivel completo).
+  updateCamera(immediate = false) {
+    const cam = this.cameras.main
+    const [a, b] = this.players
+
+    let wanted = 1
+    if (b) {
+      const needW = Math.abs(a.x - b.x) + CAMERA_PAD_X * 2
+      const needH = Math.abs(a.y - b.y) + CAMERA_PAD_Y * 2
+      wanted = Math.min(VIEW.width / needW, VIEW.height / needH)
+    }
+    wanted = Phaser.Math.Clamp(wanted, this.minZoom, 1)
+    const zoom = immediate ? wanted : cam.zoom + (wanted - cam.zoom) * CAMERA_ZOOM_LERP
+    cam.setZoom(zoom)
+
+    // Punto medio entre los jugadores, sin salirse del mundo (o centrado si el mundo es más chico).
+    const mx = this.players.reduce((sum, p) => sum + p.x, 0) / this.players.length
+    const my = this.players.reduce((sum, p) => sum + p.y, 0) / this.players.length
+    const halfW = VIEW.width / (2 * zoom)
+    const halfH = VIEW.height / (2 * zoom)
+    const cx = this.worldW <= halfW * 2 ? this.worldW / 2 : Phaser.Math.Clamp(mx, halfW, this.worldW - halfW)
+    const cy = this.worldH <= halfH * 2 ? this.worldH / 2 : Phaser.Math.Clamp(my, halfH, this.worldH - halfH)
+    this.cameraTarget.setPosition(cx, cy)
+    if (immediate) cam.centerOn(cx, cy)
+
+    // Capas fijas y nombres de jugador mantienen su tamaño en pantalla.
+    const inverse = 1 / zoom
+    this.fixedLayers.forEach((layer) => layer.setScale(inverse))
+    this.players.forEach((pl) => pl.tag.setScale(inverse))
   }
 
   emitHud() {

@@ -24,6 +24,14 @@ const TEMPLATE = {
 
 const EMPTY_FORM = { title: '', difficulty: 'easy', gridText: JSON.stringify(TEMPLATE, null, 2) }
 
+const isObject = (v) => Boolean(v) && typeof v === 'object' && !Array.isArray(v)
+
+// Si se pegó el nivel completo ({ title, difficulty, grid_json: {...} }),
+// el tablero es lo que está dentro de `grid_json`.
+function unwrapLevel(parsed) {
+  return isObject(parsed) && isObject(parsed.grid_json) ? parsed.grid_json : parsed
+}
+
 function parseGrid(text) {
   let parsed
   try {
@@ -31,10 +39,10 @@ function parseGrid(text) {
   } catch {
     return { error: 'El grid_json no es un JSON válido.' }
   }
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+  if (!isObject(parsed)) {
     return { error: 'El grid_json debe ser un objeto JSON.' }
   }
-  return { value: parsed }
+  return { value: unwrapLevel(parsed) }
 }
 
 export default function LevelsAdminPanel() {
@@ -61,6 +69,24 @@ export default function LevelsAdminPanel() {
 
   // Vista previa en vivo del JSON que se está escribiendo
   const livePreview = useMemo(() => parseGrid(form.gridText), [form.gridText])
+
+  // Al pegar un nivel completo, se completan título y dificultad y queda solo el tablero.
+  const handleGridChange = (text) => {
+    try {
+      const parsed = JSON.parse(text)
+      if (isObject(parsed) && isObject(parsed.grid_json)) {
+        setForm((f) => ({
+          title: f.title.trim() ? f.title : String(parsed.title ?? '').slice(0, 100),
+          difficulty: DIFFICULTIES.includes(parsed.difficulty) ? parsed.difficulty : f.difficulty,
+          gridText: JSON.stringify(parsed.grid_json, null, 2),
+        }))
+        return
+      }
+    } catch {
+      // todavía se está escribiendo: se deja el texto tal cual
+    }
+    setForm((f) => ({ ...f, gridText: text }))
+  }
 
   const reset = () => { setEditingId(null); setForm(EMPTY_FORM) }
 
@@ -147,7 +173,10 @@ export default function LevelsAdminPanel() {
           <div className="field">
             <label htmlFor="lvl-grid">grid_json</label>
             <textarea id="lvl-grid" className="input" rows={14} value={form.gridText}
-              spellCheck={false} onChange={(e) => setForm({ ...form, gridText: e.target.value })} />
+              spellCheck={false} onChange={(e) => handleGridChange(e.target.value)} />
+            <small style={{ color: 'var(--text-faint)' }}>
+              Puedes pegar solo el tablero o el nivel completo (con título y dificultad): se separa solo.
+            </small>
           </div>
 
           <div className="field">
