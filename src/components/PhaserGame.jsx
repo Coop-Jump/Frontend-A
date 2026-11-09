@@ -23,6 +23,7 @@ class MainScene extends Phaser.Scene {
 
   init(data) {
     this.level = data.level
+    this.mode = data.mode || 'coop'
   }
 
   create() {
@@ -65,14 +66,14 @@ class MainScene extends Phaser.Scene {
     this.physics.add.existing(this.goal, true)
 
     // Dos jugadores: J1 naranja (WASD), J2 rojo (flechas)
+    // Singleplayer: un solo jugador; coop: dos jugadores
     const spawn1 = grid.spawn_j1
     const spawn2 = grid.spawn_j2 || grid.spawn_j1
-    this.players = [
-      this.createPlayer(cx(spawn1.x), cy(spawn1.y), 0xf97316),
-      this.createPlayer(cx(spawn2.x), cy(spawn2.y), 0xe53e3e),
-    ]
-
-    this.physics.add.collider(this.players[0], this.players[1])
+    this.players = [this.createPlayer(cx(spawn1.x), cy(spawn1.y), 0xf97316)]
+    if (this.mode === 'coop') {
+      this.players.push(this.createPlayer(cx(spawn2.x), cy(spawn2.y), 0xe53e3e))
+      this.physics.add.collider(this.players[0], this.players[1])
+    }
     this.players.forEach((pl) => {
       this.physics.add.collider(pl, this.platforms)
       this.physics.add.overlap(pl, this.hazards, () => this.die(pl))
@@ -136,19 +137,35 @@ class MainScene extends Phaser.Scene {
   update() {
     if (this.finished) return
     const [p1, p2] = this.players
-    this.move(p1, this.wasd.left.isDown, this.wasd.right.isDown, this.wasd.up.isDown)
-    this.move(p2, this.cursors.left.isDown, this.cursors.right.isDown, this.cursors.up.isDown)
+    const w = this.wasd
+    const c = this.cursors
+    if (p2) {
+      // Coop: J1 con WASD, J2 con flechas
+      this.move(p1, w.left.isDown, w.right.isDown, w.up.isDown)
+      this.move(p2, c.left.isDown, c.right.isDown, c.up.isDown)
+    } else {
+      // Singleplayer: WASD, flechas o espacio mueven al único jugador
+      this.move(
+        p1,
+        w.left.isDown || c.left.isDown,
+        w.right.isDown || c.right.isDown,
+        w.up.isDown || c.up.isDown || c.space.isDown,
+      )
+    }
 
-    this.cameraTarget.setPosition((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
+    const mx = this.players.reduce((a, p) => a + p.x, 0) / this.players.length
+    const my = this.players.reduce((a, p) => a + p.y, 0) / this.players.length
+    this.cameraTarget.setPosition(mx, my)
 
     const st = (p) => (p.reachedGoal ? '✓' : '●')
+    const status = this.players.map((p, i) => `J${i + 1} ${st(p)}`).join('  ')
     this.hud.setText(
-      `Tiempo: ${formatTime(this.time.now - this.startTime)}  Muertes: ${this.deaths}  |  J1 ${st(p1)}  J2 ${st(p2)}`,
+      `Tiempo: ${formatTime(this.time.now - this.startTime)}  Muertes: ${this.deaths}  |  ${status}`,
     )
   }
 }
 
-export default function PhaserGame({ level: levelProp, onComplete }) {
+export default function PhaserGame({ level: levelProp, mode = 'coop', onComplete }) {
   const phaserRef = useRef(null)
   const onCompleteRef = useRef(onComplete)
   const [fallbackLevel, setFallbackLevel] = useState(null)
@@ -183,13 +200,13 @@ export default function PhaserGame({ level: levelProp, onComplete }) {
       physics: { default: 'arcade', arcade: { gravity: { y: GRAVITY }, debug: false } },
       scene: [],
     })
-    game.scene.add('MainScene', MainScene, true, { level })
+    game.scene.add('MainScene', MainScene, true, { level, mode })
     game.events.on('run-complete', (result) => onCompleteRef.current?.(result))
 
     return () => {
       game.destroy(true)
     }
-  }, [level])
+  }, [level, mode])
 
   return (
     <div>
@@ -201,9 +218,18 @@ export default function PhaserGame({ level: levelProp, onComplete }) {
       <div style={{ maxWidth: 800, margin: '16px auto 0', padding: 14, background: '#fff7ed', borderRadius: 12, color: '#7c2d12', fontSize: 14, border: '2px solid #ffedd5' }}>
         <strong style={{ color: '#f97316' }}>Controles:</strong>
         <ul style={{ margin: '8px 0 0', paddingLeft: 20, lineHeight: 1.6 }}>
-          <li><strong>Jugador 1 (Naranja):</strong> A / D mover, W saltar</li>
-          <li><strong>Jugador 2 (Rojo):</strong> Flechas ← → mover, ↑ saltar</li>
-          <li><strong>Objetivo:</strong> ambos jugadores deben llegar a la meta (cuadrado dorado)</li>
+          {mode === 'coop' ? (
+            <>
+              <li><strong>Jugador 1 (Naranja):</strong> A / D mover, W saltar</li>
+              <li><strong>Jugador 2 (Rojo):</strong> Flechas ← → mover, ↑ saltar</li>
+              <li><strong>Objetivo:</strong> ambos jugadores deben llegar a la meta (cuadrado dorado)</li>
+            </>
+          ) : (
+            <>
+              <li><strong>Jugador (Naranja):</strong> A / D o flechas para mover, W / ↑ / espacio para saltar</li>
+              <li><strong>Objetivo:</strong> llega a la meta (cuadrado dorado)</li>
+            </>
+          )}
           <li><strong>Pinchos rojos:</strong> suman una muerte y vuelves al inicio</li>
         </ul>
       </div>
