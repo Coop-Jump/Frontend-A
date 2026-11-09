@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { fetchLevels, createLevel, updateLevel, deleteLevel } from '../services/levelService'
+import { getTheme, isPlayableLevel } from '../game/theme'
+import LevelPreview from './LevelPreview'
 
 const DIFFICULTIES = ['easy', 'medium', 'hard', 'expert']
 
@@ -10,15 +12,17 @@ const TEMPLATE = {
   spawn_j1: { x: 1, y: 13 },
   spawn_j2: { x: 18, y: 13 },
   goal: { x: 10, y: 1 },
-  platforms: [{ x: 0, y: 14, width: 20, height: 1, type: 'ground' }],
+  platforms: [
+    { x: 0, y: 14, width: 20, height: 1, type: 'ground' },
+    { x: 4, y: 11, width: 4, height: 1, type: 'platform' },
+    { x: 12, y: 8, width: 4, height: 1, type: 'platform' },
+    { x: 9, y: 2, width: 3, height: 1, type: 'goal_platform' },
+  ],
+  hazards: [],
+  collectibles: [{ x: 5, y: 10, type: 'coin' }],
 }
 
 const EMPTY_FORM = { title: '', difficulty: 'easy', gridText: JSON.stringify(TEMPLATE, null, 2) }
-
-const card = { background: '#fff', padding: 24, borderRadius: 16, boxShadow: '0 10px 30px rgba(249,115,22,0.1)', border: '2px solid #ffedd5' }
-const input = { padding: 12, borderRadius: 10, border: '2px solid #ffedd5', background: '#fff7ed', color: '#1a202c', fontSize: 15, width: '100%', boxSizing: 'border-box' }
-const label = { fontSize: 14, fontWeight: 600, color: '#c2410c' }
-const btn = (bg) => ({ padding: '8px 16px', background: bg, color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' })
 
 function parseGrid(text) {
   let parsed
@@ -55,6 +59,9 @@ export default function LevelsAdminPanel() {
 
   useEffect(() => { load() }, [load])
 
+  // Vista previa en vivo del JSON que se está escribiendo
+  const livePreview = useMemo(() => parseGrid(form.gridText), [form.gridText])
+
   const reset = () => { setEditingId(null); setForm(EMPTY_FORM) }
 
   const handleSubmit = async (e) => {
@@ -65,6 +72,9 @@ export default function LevelsAdminPanel() {
     if (!title) return setError('El título es obligatorio.')
     const { value: grid_json, error: gridError } = parseGrid(form.gridText)
     if (gridError) return setError(gridError)
+    if (!isPlayableLevel(grid_json)) {
+      return setError('El nivel necesita grid_width, grid_height, spawn_j1 y goal (con x e y) para poder jugarse.')
+    }
 
     const payload = { title, difficulty: form.difficulty, grid_json }
     setSaving(true)
@@ -94,6 +104,7 @@ export default function LevelsAdminPanel() {
       difficulty: level.difficulty || 'easy',
       gridText: JSON.stringify(level.grid_json, null, 2),
     })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleDelete = async (level) => {
@@ -111,53 +122,78 @@ export default function LevelsAdminPanel() {
   }
 
   return (
-    <section style={{ marginTop: 30 }}>
-      <h2 style={{ color: '#f97316', fontWeight: 800, marginBottom: 14 }}>Gestión de niveles</h2>
+    <section aria-labelledby="levels-admin-title">
+      <h2 id="levels-admin-title" style={{ fontSize: 26, marginBottom: 14 }}>Gestión de niveles</h2>
 
-      {error && <p role="alert" style={{ color: '#e53e3e', fontWeight: 600 }}>{error}</p>}
-      {notice && <p role="status" style={{ color: '#15803d', fontWeight: 600 }}>{notice}</p>}
+      {error && <p role="alert" className="notice notice-error" style={{ marginBottom: 14 }}>{error}</p>}
+      {notice && <p role="status" className="notice notice-success" style={{ marginBottom: 14 }}>{notice}</p>}
 
-      <form onSubmit={handleSubmit} style={{ ...card, display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-        <h3 style={{ color: '#f97316', margin: 0 }}>{editingId ? 'Editar nivel' : 'Nuevo nivel'}</h3>
-        <label htmlFor="lvl-title" style={label}>Título</label>
-        <input id="lvl-title" style={input} value={form.title} maxLength={100} required
-          onChange={(e) => setForm({ ...form, title: e.target.value })} />
-        <label htmlFor="lvl-diff" style={label}>Dificultad</label>
-        <select id="lvl-diff" style={input} value={form.difficulty}
-          onChange={(e) => setForm({ ...form, difficulty: e.target.value })}>
-          {DIFFICULTIES.map((d) => <option key={d} value={d}>{d}</option>)}
-        </select>
-        <label htmlFor="lvl-grid" style={label}>grid_json</label>
-        <textarea id="lvl-grid" style={{ ...input, fontFamily: 'monospace', minHeight: 220 }} value={form.gridText}
-          spellCheck={false} onChange={(e) => setForm({ ...form, gridText: e.target.value })} />
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button type="submit" disabled={saving} style={btn('#f97316')}>
-            {saving ? 'Guardando...' : editingId ? 'Guardar cambios' : 'Crear nivel'}
-          </button>
-          {editingId && <button type="button" onClick={reset} style={btn('#9ca3af')}>Cancelar</button>}
-        </div>
-      </form>
+      <div className="admin-layout">
+        <form onSubmit={handleSubmit} className="panel form-stack">
+          <h3>{editingId ? '✏️ Editar nivel' : '➕ Nuevo nivel'}</h3>
 
-      {loading ? (
-        <p style={{ color: '#f97316', fontWeight: 600 }}>Cargando niveles...</p>
-      ) : levels.length === 0 ? (
-        <p style={{ color: '#c2410c' }}>No hay niveles creados.</p>
-      ) : (
-        <div style={{ display: 'grid', gap: 12 }}>
-          {levels.map((level) => (
-            <div key={level.id} style={{ ...card, padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <div>
-                <strong style={{ color: '#7c2d12' }}>{level.title}</strong>
-                <span style={{ marginLeft: 10, color: '#c2410c', fontSize: 14 }}>{level.difficulty || 'N/D'}</span>
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => handleEdit(level)} style={btn('#f97316')}>Editar</button>
-                <button onClick={() => handleDelete(level)} style={btn('#dc2626')}>Eliminar</button>
-              </div>
+          <div className="field">
+            <label htmlFor="lvl-title">Título</label>
+            <input id="lvl-title" className="input" value={form.title} maxLength={100} required
+              onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          </div>
+          <div className="field">
+            <label htmlFor="lvl-diff">Dificultad</label>
+            <select id="lvl-diff" className="input" value={form.difficulty}
+              onChange={(e) => setForm({ ...form, difficulty: e.target.value })}>
+              {DIFFICULTIES.map((d) => <option key={d} value={d}>{getTheme(d).label}</option>)}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="lvl-grid">grid_json</label>
+            <textarea id="lvl-grid" className="input" rows={14} value={form.gridText}
+              spellCheck={false} onChange={(e) => setForm({ ...form, gridText: e.target.value })} />
+          </div>
+
+          <div className="field">
+            <label>Vista previa</label>
+            {livePreview.value ? (
+              <LevelPreview grid={livePreview.value} difficulty={form.difficulty} />
+            ) : (
+              <p className="notice notice-error">{livePreview.error}</p>
+            )}
+          </div>
+
+          <div className="form-actions">
+            <button type="submit" disabled={saving} className="btn btn-primary">
+              {saving ? 'Guardando...' : editingId ? 'Guardar cambios' : 'Crear nivel'}
+            </button>
+            {editingId && <button type="button" onClick={reset} className="btn btn-ghost">Cancelar</button>}
+          </div>
+        </form>
+
+        <div>
+          {loading ? (
+            <div className="loader"><span className="spinner" /> Cargando niveles...</div>
+          ) : levels.length === 0 ? (
+            <div className="panel empty"><strong>No hay niveles creados</strong>Usa el formulario para crear el primero.</div>
+          ) : (
+            <div className="admin-list">
+              {levels.map((level) => {
+                const theme = getTheme(level.difficulty)
+                return (
+                  <div key={level.id} className={`admin-level ${editingId === level.id ? 'editing' : ''}`} style={{ '--accent': theme.css }}>
+                    <div className="thumb"><LevelPreview grid={level.grid_json} difficulty={level.difficulty} width={220} height={124} /></div>
+                    <div className="info">
+                      <strong title={level.title}>{level.title}</strong>
+                      <span className="badge">{theme.label}</span>
+                    </div>
+                    <div className="actions">
+                      <button type="button" onClick={() => handleEdit(level)} className="btn btn-ghost btn-sm">Editar</button>
+                      <button type="button" onClick={() => handleDelete(level)} className="btn btn-danger btn-sm">Eliminar</button>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
-          ))}
+          )}
         </div>
-      )}
+      </div>
     </section>
   )
 }

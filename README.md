@@ -5,64 +5,57 @@
 Detalle completo en [`docs/EVALUACION.md`](docs/EVALUACION.md).
 <!-- calidad:fin -->
 
-# Frontend-A
+# Coop Jump — Frontend
 
-## Descripción
-Proyecto de aplicación React con enrutamiento usando Vite y `react-router-dom`.
+Cliente React + Phaser del juego cooperativo de plataformas (1 o 2 jugadores en el mismo teclado).
+
+## Logo del juego
+Copia tu logo a `public/logo.png` (o `public/logo.svg`). Se usa automáticamente en la
+barra de navegación, el inicio y el login/registro. Si el archivo no existe se muestra
+el emblema incluido. Si tu logo ya trae el nombre del juego, no se agrega texto al lado.
 
 ## Estructura
-
 ```
-frontend-a/
-├── src/
-│   ├── App.jsx              # Ruteador principal (React Router)
-│   ├── main.jsx             # Punto de entrada de la aplicación
-│   └── pages/
-│       ├── Home.jsx         # Página de inicio
-│       ├── Login.jsx        # Página de login
-│       ├── Register.jsx     # Página de registro
-│       ├── Game.jsx         # Pantalla de juego
-│       ├── Leaderboard.jsx  # Tabla de clasificación
-│       └── Admin.jsx        # Panel de administración
-├── public/
-│   └── favicon.svg          # Icono del proyecto
-├── package.json             # Dependencias y scripts
-├── vite.config.js           # Configuración de Vite
-└── index.html               # HTML de la raíz
-```
-
-## Requisitos
-- Node.js v14+
-- npm v6+ or yarn
-
-## Instalación
-```bash
-cd frontend-a
-npm install
+src/
+├── App.jsx                  # Rutas (zona pública y zona privada con ProtectedRoute)
+├── components/
+│   ├── AppLayout.jsx        # Barra de navegación + pie de página
+│   ├── Logo.jsx             # Logo (public/logo.png o emblema por defecto)
+│   ├── CharacterAvatar.jsx  # Personajes en SVG para la interfaz
+│   ├── LevelPreview.jsx     # Miniatura de un nivel (canvas)
+│   ├── LevelsAdminPanel.jsx # CRUD de niveles (POST/PUT/DELETE /levels)
+│   ├── PhaserGame.jsx       # Contenedor del juego + HUD + controles
+│   └── ProtectedRoute.jsx
+├── game/
+│   ├── MainScene.js         # Escena de Phaser (física, reglas, animaciones)
+│   ├── textures.js          # Todo el arte, dibujado por código
+│   └── theme.js             # Temas por dificultad y personajes
+├── pages/                   # Home, Login, Register, Dashboard, LevelSelection,
+│                            # Game, Leaderboard, Settings, Admin
+├── services/ api/ store/    # Acceso al backend y sesión
+└── index.css                # Sistema de diseño (variables, botones, tarjetas...)
 ```
 
 ## Ejecución
 ```bash
-# Desarrollo (en el puerto 5173)
-npm run dev
-
-# Versión de producción
+npm install
+npm run dev      # http://localhost:5173
 npm run build
 ```
+La API se toma de `VITE_API_BASE_URL` (por defecto `http://localhost:3000/api`).
 
-## Páginas creadas
-- **Home** – Página principal con menú de navegación
-- **Login** – Formulario de autenticación
-- **Register** – Registro de usuario
-- **Game** – Pantalla de juego (placeholder)
-- **Leaderboard** – Clasificación (placeholder)
-- **Admin** – Panel de administración (placeholder)
+## Rutas
+- Públicas: `/`, `/login`, `/register`
+- Con sesión: `/dashboard`, `/levels?mode=single|coop`, `/game?level=<id>&mode=...`,
+  `/leaderboard`, `/settings`, `/admin`
+- `/singleplayer` y `/two-player` redirigen a la selección de nivel.
 
-## Enrutamiento
-El enrutamiento se maneja con `react-router-dom` v6:
-- `/` → Home
-- `/login` → Login
-- `/register` → Register
-- `/game` → Game
-- `/leaderboard` → Leaderboard
-- `/admin` → Admin
+## Elementos de nivel soportados (`grid_json`)
+- Plataformas: `platform`, `ground`, `goal_platform`, `moving` (`move_range`, `move_speed`),
+  `disappearing` (`disappear_delay`).
+- Peligros: `spikes`, `lava`. Caer al vacío también cuenta como muerte.
+- Coleccionables: `coin` (10 pts), `gem` (50 pts), `star` (100 pts).
+
+## Controles
+Jugador 1 (Fénix): `A` `D` mover, `W` saltar. Jugador 2 (Blu): flechas. En un jugador
+valen ambos esquemas y `Espacio`. `P`/`Esc` pausa, `R` reinicia.
