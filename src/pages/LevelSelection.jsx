@@ -1,61 +1,94 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { fetchLevels } from '../services/levelService'
+import { getTheme } from '../game/theme'
+import LevelPreview from '../components/LevelPreview'
+
+const MODES = [
+  { id: 'single', label: '👤 Un jugador' },
+  { id: 'coop', label: '👥 Cooperativo' },
+]
 
 export default function LevelSelection() {
   const [levels, setLevels] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const mode = searchParams.get('mode') === 'single' ? 'single' : 'coop'
 
   useEffect(() => {
-    async function loadLevels() {
-      try {
-        const data = await fetchLevels()
-        setLevels(data.levels || [])
-      } catch (err) {
-        const message = err?.response?.data?.message || 'No se pudieron cargar los niveles. El backend no está conectado.'
-        setError(message)
-      } finally {
-        setLoading(false)
-      }
+    let cancelled = false
+    fetchLevels()
+      .then((data) => !cancelled && setLevels(data.levels || []))
+      .catch((err) => {
+        if (!cancelled) setError(err?.response?.data?.message || 'No se pudieron cargar los niveles. Revisa que el backend esté en ejecución.')
+      })
+      .finally(() => !cancelled && setLoading(false))
+    return () => {
+      cancelled = true
     }
-    loadLevels()
   }, [])
 
   return (
-    <div className="page" style={{ maxWidth: 1000, margin: '0 auto', padding: 30 }}>
-      <h1 style={{ fontSize: 36, color: '#f97316', fontWeight: 800, marginBottom: 4 }}>Seleccionar Nivel</h1>
-      <p style={{ color: '#c2410c', marginBottom: 30, fontWeight: 500 }}>Elige un nivel para jugar.</p>
+    <>
+      <div className="page-header">
+        <p className="eyebrow">Mapas</p>
+        <h1>Selecciona un nivel</h1>
+        <p>Elige el modo de juego y el mapa que quieres superar.</p>
+      </div>
 
-      {loading && <p style={{ color: '#f97316', fontSize: 18, fontWeight: 600 }}>Cargando niveles...</p>}
-      {error && (
-        <div style={{ background: '#fff', border: '2px solid #f97316', borderRadius: 12, padding: 20, color: '#7c2d12', marginBottom: 20 }}>
-          <strong style={{ color: '#f97316', fontSize: 20 }}>Conexión fallida</strong>
-          <p style={{ margin: '8px 0 0' }}>{error}</p>
-          <p style={{ fontSize: 14, color: '#fb923c', marginTop: 8 }}>Asegúrate de que el servidor esté corriendo.</p>
-        </div>
-      )}
+      <div className="mode-switch" role="tablist" aria-label="Modo de juego">
+        {MODES.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            role="tab"
+            aria-selected={mode === m.id}
+            className={mode === m.id ? 'active' : ''}
+            onClick={() => setSearchParams({ mode: m.id }, { replace: true })}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+
+      {loading && <div className="loader"><span className="spinner" /> Cargando niveles...</div>}
+      {error && <p className="notice notice-error" role="alert">{error}</p>}
       {!loading && !error && levels.length === 0 && (
-        <p style={{ color: '#c2410c' }}>No hay niveles disponibles.</p>
+        <div className="panel empty">
+          <strong>Todavía no hay niveles</strong>
+          Crea el primero desde el <Link to="/admin">editor de niveles</Link>.
+        </div>
       )}
 
       {!loading && !error && levels.length > 0 && (
-        <div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
-          {levels.map((level) => (
-            <div key={level.id} style={{ background: 'linear-gradient(135deg, #fff7ed 0%, #fff 100%)', border: '2px solid #ffedd5', borderRadius: 16, padding: 24, color: '#1a202c', boxShadow: '0 8px 20px rgba(249,115,22,0.15)' }}>
-              <h3 style={{ fontSize: 22, color: '#f97316', fontWeight: 800, marginBottom: 6 }}>{level.title}</h3>
-              <p style={{ color: '#7c2d12', fontSize: 15, marginBottom: 12 }}>Dificultad: {level.difficulty || 'N/D'}</p>
-              <button
-                onClick={() => navigate(`/game?level=${level.id}`)}
-                style={{ width: '100%', padding: 12, background: '#f97316', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 16, cursor: 'pointer' }}
-              >Jugar</button>
-            </div>
-          ))}
+        <div className="levels-grid">
+          {levels.map((level, i) => {
+            const theme = getTheme(level.difficulty)
+            const grid = level.grid_json || {}
+            const treasures = (grid.collectibles || []).length
+            const hazards = (grid.hazards || []).length
+            return (
+              <article key={level.id} className="level-card" style={{ '--accent': theme.css }}>
+                <div className="thumb">
+                  <LevelPreview grid={grid} difficulty={level.difficulty} />
+                  <span className="badge">{theme.label}</span>
+                  <span className="num">{String(i + 1).padStart(2, '0')}</span>
+                </div>
+                <div className="body">
+                  <h3>{level.title}</h3>
+                  <div className="level-stats">
+                    <span>📐 {grid.grid_width || '?'}×{grid.grid_height || '?'}</span>
+                    <span>⭐ {treasures} tesoros</span>
+                    <span>⚠️ {hazards} peligros</span>
+                  </div>
+                  <Link to={`/game?level=${level.id}&mode=${mode}`} className="btn btn-primary btn-block">▶ Jugar</Link>
+                </div>
+              </article>
+            )
+          })}
         </div>
       )}
-
-      <Link to="/dashboard" style={{ display: 'inline-block', marginTop: 30, padding: '12px 30px', background: '#f97316', color: '#fff', borderRadius: 8, textDecoration: 'none', fontWeight: 800, fontSize: 16 }}>← Volver al Dashboard</Link>
-    </div>
+    </>
   )
 }
