@@ -10,12 +10,12 @@
 | Aspecto | Resultado |
 |---|---|
 | Tipo de proyecto | frontend |
-| Índice de calidad de servicios | **27/100** (mínimo 50) |
-| Criterios cumplidos | **10/14** |
-| Aprobado (semáforo) | **NO** |
-| Código (LOC) | 2,494 |
-| Archivos de código | 30 |
-| Tests (archivos) | 0 |
+| Índice de calidad de servicios | **83/100** (mínimo 50) |
+| Criterios cumplidos | **13/14** |
+| Aprobado (semáforo) | **SI** |
+| Código (LOC) | 3,003 |
+| Archivos de código | 64 |
+| Tests (archivos) | 14 |
 | Cobertura de líneas | no aplica (frontend sin herramienta de cobertura E2E) |
 | Capas detectadas | vistas, servicios, estado |
 | Pushes directos a `main` (sin PR) | 0 |
@@ -26,7 +26,7 @@
 
 | Autor | Commits | Código (LOC) | Tests (LOC) | Docs (LOC) | Días activos | % del código |
 |---|---:|---:|---:|---:|---:|---:|
-| Ivan Roth | 11 | 3,040 | 0 | 44 | 6 | 100% |
+| Ivan Roth | 12 | 3,651 | 1,213 | 44 | 7 | 100% |
 
 > _El LOC de autoría lo calcula RepoSense sobre el historial y puede diferir del LOC de código del análisis de calidad (que mira solo el estado de `main`)._
 
@@ -36,7 +36,7 @@
 
 | Alumno | Sesiones | Cumplimiento | Pausa | Recencia | IC | Nivel | Para subir de nivel |
 |---|--:|--:|--:|--:|--:|--|--|
-| Ivan Roth | 12 | 47% | 12 d | 86% | **42** | No aprueba | Cumplimiento 47% (mín. 50%) |
+| Ivan Roth | 13 | 51% | 12 d | 100% | **47** | Aprueba | Cumplimiento 51% (mín. 100%); Pausa 12 d (máx. 5 d) |
 
 > Para aprobar el IC: **2 sesiones por semana** sostenidas, sin pausas mayores a **10 días** y con actividad en las **últimas 2 semanas**. Se excluyen merges, bots y al docente. Zona horaria UTC-3.
 
@@ -44,21 +44,17 @@
 
 Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuando el resultado está en rojo, se agregan preguntas para **investigar la causa** (no hay recetas: entender el porqué es parte de la evaluación).
 
-### 1. Índice de calidad de servicios (indice) — A REVISAR
+### 1. Índice de calidad de servicios (indice) — OK
 
 - **Qué mide:** Un resumen numérico (0-100) que combina todas las señales y métricas del análisis, con topes duros por duplicación.
 - **Por qué importa:** Ordena y prioriza la revisión: un índice bajo indica varias señales que conviene mirar juntas.
-- **Tu resultado:** índice **27/100** _(mínimo 50)_
-- **Para investigar la causa:**
-    - ¿En qué momento del proyecto se concentraron los problemas (arranque, integración de partes, cierre)?
-    - ¿El índice bajó por muchas señales chicas o por una o dos graves?
-    - ¿Se revisó el código integrado después de unir el trabajo de cada integrante?
+- **Tu resultado:** índice **83/100** _(mínimo 50)_
 
 ### 2. Duplicación (DRY) (duplicacion) — OK
 
 - **Qué mide:** Porcentaje de bloques de código repetidos (similitud) en el repositorio.
 - **Por qué importa:** Cada copia se mantiene por separado: un arreglo hay que repetirlo y los defectos se multiplican.
-- **Tu resultado:** **1.1%** de duplicación _(máximo 15%)_
+- **Tu resultado:** **0.5%** de duplicación _(máximo 15%)_
 
 ### 3. Secretos hardcodeados (SEC) — OK
 
@@ -96,41 +92,33 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 - **Por qué importa:** Se pierde la ayuda del compilador justo donde los datos vienen de afuera (API, formularios).
 - **Tu resultado:** **0** uso(s) de `any` _(máximo 2)_
 
-### 9. Componente demasiado grande (BigC) — A REVISAR
+### 9. Componente demasiado grande (BigC) — OK
 
 - **Qué mide:** Componentes de UI muy extensos, que suelen mezclar render, estado y lógica.
 - **Por qué importa:** Son difíciles de leer, probar y reutilizar, y sus cambios tienen efectos inesperados.
-- **Tu resultado:** **2** componente(s) demasiado grande(s) _(máximo 1)_
-- **Para investigar la causa:**
-    - ¿El componente creció a medida que se agregaban requisitos, sin volver a dividirlo?
-    - ¿Mezcla responsabilidades distintas (mostrar, calcular, pedir datos)?
-    - ¿Se dividió por pantalla o por unidad de responsabilidad?
+- **Tu resultado:** **0** componente(s) demasiado grande(s) _(máximo 1)_
 
-### 10. Baja cohesión (Coh) — OK
+### 10. Baja cohesión (Coh) — A REVISAR
 
 - **Qué mide:** Una clase o unidad cuyos métodos y campos no están relacionados entre sí.
 - **Por qué importa:** Una unidad que cambia por motivos distintos es frágil y cuesta entenderla.
-- **Tu resultado:** **0** unidad(es) con baja cohesión _(máximo 0)_
+- **Tu resultado:** **1** unidad(es) con baja cohesión _(máximo 0)_
+- **Para investigar la causa:**
+    - ¿La unidad agrupa cosas que en realidad pertenecen a lugares distintos?
+    - ¿Cambia por motivos diferentes según la tarea?
+    - ¿Se pensó su responsabilidad antes de escribirla, o se fue agregando?
 
-### 11. Complejidad alta (Compl) — A REVISAR
+### 11. Complejidad alta (Compl) — OK
 
 - **Qué mide:** Complejidad ciclomática: cantidad de caminos posibles dentro de una función (condicionales, bucles, casos).
 - **Por qué importa:** Muchos caminos = difícil de seguir y de probar; suelen esconderse casos sin cubrir.
-- **Tu resultado:** **26** bloque(s) de complejidad alta _(máximo 5 por 1000 LOC (tenés 2494 LOC))_
-- **Para investigar la causa:**
-    - ¿Se agregaron condiciones a medida que aparecían casos nuevos?
-    - ¿Se probaron todos los caminos o solo el caso principal?
-    - ¿Hay reglas de negocio mezcladas con detalles técnicos?
+- **Tu resultado:** **2** bloque(s) de complejidad alta _(máximo 5 por 1000 LOC (tenés 3003 LOC))_
 
-### 12. Funciones/métodos largos o con muchos parámetros (Tam) — A REVISAR
+### 12. Funciones/métodos largos o con muchos parámetros (Tam) — OK
 
 - **Qué mide:** Tamaño de las funciones/métodos y cantidad de parámetros.
 - **Por qué importa:** Una función que hace varias cosas cuesta leerla, nombrarla y reutilizarla.
-- **Tu resultado:** **33** función/método(s) largos o con muchos parámetros _(máximo 10 por 1000 LOC)_
-- **Para investigar la causa:**
-    - ¿La función creció por acumulación de pasos?
-    - ¿Agrupa operaciones que podrían describirse por separado?
-    - ¿Los parámetros representan una misma idea (un objeto) o cosas sueltas?
+- **Tu resultado:** **9** función/método(s) largos o con muchos parámetros _(máximo 10 por 1000 LOC)_
 
 ### 13. Acoplamiento alto (Acop) — OK
 
@@ -142,30 +130,23 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Cantidad de vistas/componentes de pantalla del frontend.
 - **Por qué importa:** El frontend se mide por pantallas: pocas vistas sugiere poca cobertura de la interfaz pedida.
-- **Tu resultado:** **18** vista(s)/componente(s) _(mínimo 6)_
+- **Tu resultado:** **30** vista(s)/componente(s) _(mínimo 6)_
 
 ## 5. Observaciones y qué falta
 
-Criterios que hoy están en rojo y, para cada uno, una explicación breve de **cómo corregirlo** hasta alcanzar el nivel de aprobación (perfil `exigente`):
+**Aprobado con observaciones.** Estos criterios quedan en rojo (se permiten hasta **3** sin que sean compuertas críticas), así que no bloquean la aprobación pero conviene corregirlos:
 
 | Criterio | Resultado actual | Meta | Brecha | Cómo alcanzarlo |
 |---|---|---|---|---|
-| Índice de calidad de servicios (indice) | índice **27/100** | mínimo 50 | faltan 23 pts | El índice sólo penaliza lo que **excede** los umbrales de cada criterio: si tenés todo en verde, el índice es 100. Si está en rojo, mirá la columna **Brecha** y los criterios en rojo; corregí primero duplicación, SEC, SQL y capas. Meta del perfil exigente: ≥50. |
-| Componente demasiado grande (BigC) | **2** componente(s) demasiado grande(s) | máximo 1 | 1 componente(s) de más | Dividí el componente por responsabilidad en subcomponentes (render, estado, acceso a datos) y dejá el original sólo como orquestador. Meta: ≤1 componente grande. |
-| Complejidad alta (Compl) | **26** bloque(s) de complejidad alta | máximo 5 por 1000 LOC (tenés 2494 LOC) | 26 hallazgo(s); el máximo para 2,494 LOC es 12.5 | Extraé condiciones y ramas a funciones con nombre propio, usá retornos tempranos y evitá anidar `if`/`switch`. Meta: ≤5 bloques por 1000 LOC. |
-| Funciones/métodos largos o con muchos parámetros (Tam) | **33** función/método(s) largos o con muchos parámetros | máximo 10 por 1000 LOC | 33 hallazgo(s); el máximo para 2,494 LOC es 24.9 | Partí las funciones/métodos largos en pasos con nombre y agrupá los parámetros que representan una misma idea en un objeto. Meta: ≤10 por 1000 LOC. |
-
-> Empezá por las señales de seguridad (**SEC**, **SQL**) y por la **duplicación**: son las que más pesan en el índice y las más rápidas de verificar a ojo. Después de corregir, volvé a correr la medición: el semáforo se recalcula sobre `main`.
-
-> **Tests (informativo):** hoy tenés **0** archivo(s) de test; la meta es **5**, pero **no** es una compuerta del semáforo. Para acercarte, agregá tests de los flujos principales (servicios y endpoints) y corré la suite con coverage.
+| Baja cohesión (Coh) | **1** unidad(es) con baja cohesión | máximo 0 | 1 clase(s) a separar | Separá la clase en unidades con una sola responsabilidad: si los métodos cambian por motivos distintos, son clases distintas. Meta: 0 clases con baja cohesión. |
 
 ## 6. Actividad en clase (miércoles y viernes)
 
-> Se consideran las **23 clases** del período (miércoles y viernes, según `config/constancia.json`; feriados y semanas sin clase descontados). `Commits` = commits de trabajo (no-merge); `Merges` = merges de PR (también son push). Los días sin actividad dicen **sin actividad**.
+> Se consideran las **26 clases** del período (miércoles y viernes, según `config/constancia.json`; feriados y semanas sin clase descontados). `Commits` = commits de trabajo (no-merge); `Merges` = merges de PR (también son push). Los días sin actividad dicen **sin actividad**.
 
 ### Ivan Roth
 
-**11/23 clases con actividad** · 19 commits · 19 merges
+**13/26 clases con actividad** · 23 commits · 23 merges
 
 | Fecha | Actividad | Repositorios | Commits / merges |
 |---|:--:|---|--:|
@@ -192,40 +173,16 @@ Criterios que hoy están en rojo y, para cada uno, una explicación breve de **c
 | 2026-10-23 | **Sí** | Frontend-A | 1 / 1 |
 | 2026-10-28 | **Sí** | Backend-A, Frontend-A | 4 / 6 |
 | 2026-10-30 | **Sí** | Backend-A, Frontend-A | 2 / 2 |
+| 2026-11-04 | No | sin actividad | 0 / 0 |
+| 2026-11-06 | **Sí** | Backend-A, Frontend-A | 3 / 3 |
+| 2026-11-11 | **Sí** | Frontend-A | 1 / 1 |
 
 ## 7. Anexo: dónde mirar
 
 Archivos donde el análisis encontró cada señal en rojo (sin número de línea, a propósito):
 
-**Componente demasiado grande (BigC)** — 2 archivo(s):
-- `src/components/LevelsAdminPanel.jsx`
-- `src/pages/Leaderboard.jsx`
-
-**Complejidad alta (Compl)** — 9 archivo(s):
-- `src/components/LevelPreview.jsx`
-- `src/components/LevelsAdminPanel.jsx`
+**Baja cohesión (Coh)** — 1 archivo(s):
 - `src/game/MainScene.js`
-- `src/game/textures.js`
-- `src/pages/Game.jsx`
-- `src/pages/Leaderboard.jsx`
-- `src/pages/LevelSelection.jsx`
-- `src/pages/Login.jsx`
-- `src/pages/Register.jsx`
-
-**Funciones/métodos largos o con muchos parámetros (Tam)** — 13 archivo(s):
-- `src/components/AppLayout.jsx`
-- `src/components/LevelPreview.jsx`
-- `src/components/LevelsAdminPanel.jsx`
-- `src/game/MainScene.js`
-- `src/game/textures.js`
-- `src/pages/Dashboard.jsx`
-- `src/pages/Game.jsx`
-- `src/pages/Home.jsx`
-- `src/pages/Leaderboard.jsx`
-- `src/pages/LevelSelection.jsx`
-- `src/pages/Login.jsx`
-- `src/pages/Register.jsx`
-- `src/pages/Settings.jsx`
 
 ---
 _Informe generado por la cátedra. Los umbrales corresponden al perfil `exigente`. Ante dudas, revisá el archivo señalado y el criterio en `CRITERIOS-CALIDAD.md`._
