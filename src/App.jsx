@@ -11,6 +11,21 @@ import Settings from './pages/Settings'
 import AppLayout from './components/AppLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 
+const PRIVATE_ROUTES = [
+  { path: '/dashboard', element: <Dashboard /> },
+  { path: '/levels', element: <LevelSelection /> },
+  { path: '/game', element: <Game /> },
+  { path: '/leaderboard', element: <Leaderboard /> },
+  { path: '/settings', element: <Settings /> },
+  { path: '/admin', element: <Admin /> },
+]
+
+// Rutas antiguas: ahora el modo se elige en la selección de nivel
+const LEGACY_REDIRECTS = [
+  { path: '/singleplayer', to: '/levels?mode=single' },
+  { path: '/two-player', to: '/levels?mode=coop' },
+]
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -22,18 +37,11 @@ export default function App() {
         {/* Zona privada: exige sesión y comparte barra de navegación */}
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/levels" element={<LevelSelection />} />
-            <Route path="/game" element={<Game />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/admin" element={<Admin />} />
+            {PRIVATE_ROUTES.map((r) => <Route key={r.path} path={r.path} element={r.element} />)}
           </Route>
         </Route>
 
-        {/* Rutas antiguas: ahora el modo se elige en la selección de nivel */}
-        <Route path="/singleplayer" element={<Navigate to="/levels?mode=single" replace />} />
-        <Route path="/two-player" element={<Navigate to="/levels?mode=coop" replace />} />
+        {LEGACY_REDIRECTS.map((r) => <Route key={r.path} path={r.path} element={<Navigate to={r.to} replace />} />)}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

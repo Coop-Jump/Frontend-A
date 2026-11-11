@@ -76,17 +76,16 @@ export const CHARACTERS = [
   { id: 'blu', name: 'Blu', color: '#3b82f6' },
 ]
 
+const isPoint = (p) => Boolean(p) && Number.isFinite(p.x) && Number.isFinite(p.y)
+
 // Valida lo mínimo que necesita el juego para renderizar un nivel.
 export function isPlayableLevel(grid) {
-  return Boolean(
-    grid &&
-      Number.isFinite(grid.grid_width) &&
-      Number.isFinite(grid.grid_height) &&
-      grid.goal &&
-      Number.isFinite(grid.goal.x) &&
-      Number.isFinite(grid.goal.y) &&
-      grid.spawn_j1 &&
-      Number.isFinite(grid.spawn_j1.x) &&
-      Number.isFinite(grid.spawn_j1.y),
-  )
+  if (!grid) return false
+  const checks = [
+    Number.isFinite(grid.grid_width),
+    Number.isFinite(grid.grid_height),
+    isPoint(grid.goal),
+    isPoint(grid.spawn_j1),
+  ]
+  return checks.every(Boolean)
 }
