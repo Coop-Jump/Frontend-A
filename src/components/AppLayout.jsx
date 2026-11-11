@@ -11,11 +11,32 @@ const LINKS = [
   { to: '/settings', label: 'Ajustes' },
 ]
 
+function NavLinks() {
+  return (
+    <nav className="nav-links" aria-label="Principal">
+      {LINKS.map((l) => (
+        <NavLink key={l.to} to={l.to} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+          {l.label}
+        </NavLink>
+      ))}
+    </nav>
+  )
+}
+
+function NavUser({ username, onLogout }) {
+  return (
+    <div className="nav-user">
+      <span className="avatar" aria-hidden="true">{(username || '?').charAt(0).toUpperCase()}</span>
+      <span className="nav-username">{username || 'Jugador'}</span>
+      <button type="button" className="btn btn-ghost btn-sm" onClick={onLogout}>Salir</button>
+    </div>
+  )
+}
+
 export default function AppLayout() {
   const { user } = useAuth()
   const navigate = useNavigate()
-
-  const handleLogout = () => {
+  const logout = () => {
     clearAuthSession()
     navigate('/')
   }
@@ -25,23 +46,11 @@ export default function AppLayout() {
       <header className="navbar">
         <div className="navbar-inner">
           <Logo size={40} to="/dashboard" />
-          <nav className="nav-links" aria-label="Principal">
-            {LINKS.map((l) => (
-              <NavLink key={l.to} to={l.to} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-                {l.label}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="nav-user">
-            <span className="avatar" aria-hidden="true">{(user?.username || '?').charAt(0).toUpperCase()}</span>
-            <span className="nav-username">{user?.username || 'Jugador'}</span>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={handleLogout}>Salir</button>
-          </div>
+          <NavLinks />
+          <NavUser username={user?.username} onLogout={logout} />
         </div>
       </header>
-      <main className="page-container">
-        <Outlet />
-      </main>
+      <main className="page-container"><Outlet /></main>
       <footer className="footer">Coop Jump · juego cooperativo de plataformas</footer>
     </div>
   )

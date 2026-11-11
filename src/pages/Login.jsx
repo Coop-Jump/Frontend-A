@@ -1,64 +1,24 @@
-import { useState } from 'react'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { loginUser, saveAuthSession } from '../services/authService'
-import { useAuth } from '../hooks/useAuth'
-import Logo from '../components/Logo'
+import { Link, Navigate } from 'react-router-dom'
+import { useLoginForm } from '../hooks/useLoginForm'
+import AuthCard, { Field } from '../components/AuthCard'
 
 export default function Login() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { isAuthenticated } = useAuth()
-  const redirectTo = location.state?.from || '/dashboard'
-
-  if (isAuthenticated && !loading) return <Navigate to={redirectTo} replace />
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      const response = await loginUser({ username: username.trim(), password })
-      saveAuthSession({ token: response.token || response.accessToken, user: response.user })
-      navigate(redirectTo, { replace: true })
-    } catch (err) {
-      const message = err?.response?.data?.message || 'No se pudo conectar con el servidor. El backend no está en ejecución.'
-      setError(message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const form = useLoginForm()
+  if (form.alreadyLoggedIn) return <Navigate to={form.redirectTo} replace />
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <div className="logo-wrap"><Logo size={64} to="/" stacked /></div>
-        <h1>Iniciar sesión</h1>
-        <p className="subtitle">Entra al mundo de Coop Jump</p>
-
-        <form onSubmit={handleSubmit} className="form-stack">
-          <div className="field">
-            <label htmlFor="username">Usuario</label>
-            <input id="username" className="input" type="text" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="tu_usuario" required />
-          </div>
-          <div className="field">
-            <label htmlFor="password">Contraseña</label>
-            <input id="password" className="input" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
-          </div>
-          {error && <p className="notice notice-error" role="alert">{error}</p>}
-          <button type="submit" disabled={loading} className="btn btn-primary btn-block btn-lg">
-            {loading ? 'Entrando...' : 'Entrar'}
-          </button>
-        </form>
-
-        <div className="auth-links">
-          <p>¿No tienes cuenta? <Link to="/register">Regístrate</Link></p>
-          <Link to="/">← Volver al inicio</Link>
-        </div>
-      </div>
-    </div>
+    <AuthCard title="Iniciar sesión" subtitle="Entra al mundo de Coop Jump"
+      footer={<p>¿No tienes cuenta? <Link to="/register">Regístrate</Link></p>}>
+      <form onSubmit={form.submit} className="form-stack">
+        <Field id="username" label="Usuario" type="text" autoComplete="username" placeholder="tu_usuario" required
+          value={form.username} onChange={(e) => form.setUsername(e.target.value)} />
+        <Field id="password" label="Contraseña" type="password" autoComplete="current-password" placeholder="••••••••" required
+          value={form.password} onChange={(e) => form.setPassword(e.target.value)} />
+        {form.error && <p className="notice notice-error" role="alert">{form.error}</p>}
+        <button type="submit" disabled={form.loading} className="btn btn-primary btn-block btn-lg">
+          {form.loading ? 'Entrando...' : 'Entrar'}
+        </button>
+      </form>
+    </AuthCard>
   )
 }
