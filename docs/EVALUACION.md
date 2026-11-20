@@ -188,13 +188,25 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 ## 7. Anexo: archivos donde se originan los problemas
 
-Se listan los archivos y líneas que el análisis marca para cada criterio en rojo. Para **duplicación** se muestran los archivos con más líneas repetidas; para **cobertura**, las unidades por debajo del umbral.
+Se listan **todos** los archivos y líneas que el análisis marca para cada criterio en rojo. Para **duplicación** se muestran los archivos con líneas repetidas; para **cobertura**, las unidades por debajo del umbral.
+
+**Resumen por archivo** — archivos con más hallazgos:
+
+| Archivo | Hallazgos | Peso total | Señales |
+|---|---:|---:|---|
+| `src/utils/drawLevelPreview.js` | 4 | 16 | long_params |
+| `src/game/MainScene.js` | 2 | 16 | high_coupling, low_cohesion |
+| `src/game/art/background.js` | 2 | 8 | long_params |
+| `src/game/rules.js` | 2 | 8 | long_params |
+| `src/game/art/core.js` | 1 | 4 | long_params |
+| `src/hooks/usePhaserGame.js` | 1 | 5 | high_complexity |
+| `src/pages/Game.jsx` | 1 | 5 | high_complexity |
 
 **Baja cohesión (Coh)** — 1 hallazgo(s) en 1 archivo(s):
 
-| Archivo | Línea(s) | Señal |
-|---|---|---|
-| `src/game/MainScene.js` | 12 | clase 'MainScene' con baja cohesión (32%) |
+| Archivo | Línea(s) | Señal | Detalle |
+|---|---|---|---|
+| `src/game/MainScene.js` | 12 | low_cohesion | clase 'MainScene' con baja cohesión (32%) |
 
 ---
 _Informe generado por la cátedra. Los umbrales corresponden al perfil `exigente`. Ante dudas, revisá el archivo y la línea señalados y el criterio en `CRITERIOS-CALIDAD.md`._
